@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    nacos:
+      server-addr: 192.168.150.129:8848
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user/**
+        - id: permission-service
+          uri: lb://permission-service
+          predicates:
+            - Path=/permission/**
+        - id: logging-service
+          uri: lb://logging-service
+          predicates:
+            - Path=/logs/**
+server:
+  port: 8085
+system:
+  jwt:
+    location: classpath:JWT.jks
+    alias: hmall
+    password: hmall123
+    tokenTTL: 30m
+  auth:
+    excludePaths:
+      - /user/login
+      - /user/register
