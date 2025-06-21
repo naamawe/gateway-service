@@ -10,8 +10,6 @@ import exception.UnauthorizedException;
 import org.springframework.stereotype.Component;
 
 import java.security.KeyPair;
-import java.time.Duration;
-import java.util.Date;
 
 /**
  * @author master
@@ -22,22 +20,6 @@ public class JwtUtils {
 
     public JwtUtils(KeyPair keyPair) {
         this.jwtSigner = JWTSignerUtil.createSigner("rs256", keyPair);
-    }
-
-    /**
-     * 创建 access-token
-     * @param userId
-     * @param ttl
-     * @return
-     */
-    public String createToken(Long userId, String role, Duration ttl) {
-        // 1.生成jws
-        return JWT.create()
-                .setPayload("user", userId)
-                .setPayload("role", role)
-                .setExpiresAt(new Date(System.currentTimeMillis() + ttl.toMillis()))
-                .setSigner(jwtSigner)
-                .sign();
     }
 
     /**

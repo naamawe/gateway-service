@@ -18,6 +18,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import static com.xhx.gatewayservice.constant.Constant.*;
+
 /**
  * @author master
  */
@@ -30,30 +32,25 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     private final AntPathMatcher autPathMather = new AntPathMatcher();
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        System.out.println("=== 调试信息开始 ===");
-        System.out.println("进入全局过滤器：" + exchange.getRequest().getPath().value());
-        System.out.println("AuthProperties: " + authProperties);
-        System.out.println("排除路径配置：" + authProperties.getExcludePaths());
-        System.out.println("=== 调试信息结束 ===");
 
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value();
 
         if (isExclude(path)){
-            System.out.println("✓ 路径被排除，直接放行: " + path);
+            System.out.println(PATH_EXCLUDE + path);
             return chain.filter(exchange);
         }
 
-        System.out.println("✗ 路径未被排除，需要认证: " + path);
+        System.out.println(PATH_INCLUDE + path);
 
         String token = null;
-        List<String> headers = request.getHeaders().get("Authorization");
+        List<String> headers = request.getHeaders().get(AUTHORIZATION);
         if (headers != null && !headers.isEmpty()){
             token = headers.get(0);
         }
 
         if (token == null) {
-            System.out.println("Token为空，返回401");
+            System.out.println(NULL_TOKEN);
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
@@ -62,7 +59,7 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         try {
             userInfo = jwtUtils.parseToken(token);
         } catch (Exception e) {
-            System.out.println("Token解析失败: " + e.getMessage());
+            System.out.println(TOKEN_ERROR + e.getMessage());
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
@@ -72,9 +69,9 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         String ip = userInfo.ip();
         ServerWebExchange swe = exchange.mutate()
                 .request(builder -> builder
-                        .header("user-Info", userId)
-                        .header("user-Role", role)
-                        .header("user-Ip", ip))
+                        .header(USER_INFO, userId)
+                        .header(USER_ROLE, role)
+                        .header(USER_IP, ip))
                 .build();
 
 
