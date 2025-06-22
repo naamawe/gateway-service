@@ -20,10 +20,6 @@ spring:
           uri: lb://permission-service
           predicates:
             - Path=/permission/**
-        - id: logging-service
-          uri: lb://logging-service
-          predicates:
-            - Path=/logs/**
 server:
   port: 8085
 system:
